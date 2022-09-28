@@ -2,6 +2,7 @@ package daniel.springframework.msscbeerservice.web.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -20,6 +21,16 @@ public class MvcExceptionHandler {
                 .stream()
                 .map(constraintViolation ->
                         constraintViolation.getPropertyPath() + " : " + constraintViolation.getMessage())
+                .toList());
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<List<String>> handleConstraintViolationException(MethodArgumentNotValidException exception) {
+        List<String> errors = new ArrayList<>(exception.getErrorCount());
+        errors.addAll(exception.getAllErrors()
+                .stream()
+                .map(error -> error.getDefaultMessage())
                 .toList());
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
